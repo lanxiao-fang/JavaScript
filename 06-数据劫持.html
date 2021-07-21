@@ -1,0 +1,86 @@
+<!--
+ * @Description: file content
+ * @Author: xiaofang lan
+ * @Date: 2021-07-21 11:49:23
+ * @LastEditors: xiaofang lan
+ * @LastEditTime: 2021-07-21 15:03:51
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数据劫持</title>
+</head>
+
+<body>
+  <input type="text" name="" id="demo">
+  <div id="showText"></div>
+</body>
+<script>
+  var oDiv = document.getElementById('showText');
+  var oInput = document.getElementById('demo');
+  var oData = {
+    valueObj: {
+      value: '嘻嘻',
+      threeObj: {
+        value: '我是第三层'
+      }
+    },
+    name: 'jack'
+  }
+  //输入框事件：触发数据修改(写入)
+  oInput.oninput = function () {
+    // oData.name = this.value;
+    oData.valueObj.value = this.value;
+    upDate()
+  }
+  //修改DOM数据（页面渲染）
+  function upDate() {
+    // oDiv.innerText = oData.name;
+    oDiv.innerText = oData.valueObj.value;
+  }
+  upDate();//初始数据渲染
+  //给数据绑定监听
+  function Observer(data) {
+    if (!data || typeof data != 'object') {
+      return data;
+    };
+    // Object.keys(data)不能获取数组的索引，所以Observer无法实现数据数据监听
+    // console.log(" Object.keys(data)",  Object.keys(data));// ["valueObj","name"]
+    Object.keys(data).forEach(function (item) {
+      definedRective(data, item, data[item]); //
+    })
+  }
+  //数据监听：当setter被触发时，修改数据并渲染到页面
+  function definedRective(data, key, val) {
+    Observer(val);    //使用递归深度监听对象数据变化，在内部调用自己，例如：示例数据oData.valueObj.value的监听
+    Object.defineProperty(data, key, {
+      get() {
+        return val;
+      },
+      set(newValue) {
+        if (newValue == val) return;
+        val = newValue;
+        upDate(); //数据渲染到DOM
+      }
+    })
+  }
+  Observer(oData);//给数据绑定监听方法
+</script>
+
+</html>
+<!--
+1 - Object.keys：是将对象的所有第一层属性获取到，并返回一个属性数组
+2 - Object.defineProperty(obj, key, descriptor)：该方法会直接在一个对象上定义一个新属性，或者修改一个对象的现有属性，并返回此对象。
+    obj为该对象，key为对象上的属性名称，descriptor为要定义或修改的属性描述符，主要是get和set方法，在vue的双向数据绑定原理中用到。
+    a - configurable：当且仅当该属性的 configurable 键值为 true 时，该属性的描述符才能够被改变，同时该属性也能从对应的对象上被删除，默认为false
+    b - enumerable：当且仅当该属性的 enumerable 键值为 true 时，该属性才会出现在对象的枚举属性中，默认为 false。
+    c - value：该属性对应的值。可以是任何有效的 JavaScript 值（数值，对象，函数等），默认为 undefined。
+    d - writable：当且仅当该属性的 writable 键值为 true 时，属性的值，也就是上面的 value，才能被赋值运算符 (en-US)改变，默认为 false。
+    e - get：访问该属性时会触发get函数，该函数的返回值会被用作属性的值，默认为 undefined。
+    f - set：当属性值被修改时，会调用此函数。该方法接受一个参数（也就是被赋予的新值），会传入赋值时的 this 对象，默认为 undefined。
+ -->
+
