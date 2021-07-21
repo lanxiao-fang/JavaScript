@@ -1,0 +1,171 @@
+<!--
+ * @Description: file content
+ * @Author: xiaofang lan
+ * @Date: 2021-07-21 15:40:02
+ * @LastEditors: xiaofang lan
+ * @LastEditTime: 2021-07-21 17:53:48
+-->
+<!-- https://segmentfault.com/a/1190000019198822 -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>proxy数据劫持</title>
+</head>
+
+<body>
+
+</body>
+<script>
+  // 1 - get(target, key)方法
+  let bao = {
+    name: "LV",
+    price: 9999,
+  }
+  let proxyBao = new Proxy(bao, {
+    // target：得到的目标值  key：目标的key值，相当于对象的属性
+    get: function (target, key) {
+      if (target["price"] > 5000) {
+        return "超出预算"
+      } else {
+        return "买买买"
+      }
+    }
+  })
+  // 访问price属性
+  proxyBao.price
+  console.log(proxyBao, proxyBao.price);
+
+  // 2 - set(target, key, value, receiver)方法
+  let validator = {
+    get: function (target, key) {
+      console.log('读取了', key);
+      return Reflect.get(target, key)
+    },
+    set: function (target, key, value, receiver) {
+      if (key === "age") {
+        // 判断是否为整数
+        if (!Number.isInteger(value)) {
+          throw new TypeError("年龄必须是整数！！！！")
+        }
+        if (value < 18) {
+          throw new TypeError("未成年")
+        }
+        target[key] = value
+        // Reflect.set(target, key, `强行设置为 ${value}`)
+      }
+    }
+  }
+  let person = {
+    name: "jack"
+  }
+  let personProxy = new Proxy(person, validator)
+  // 修改年龄值---18以下报错未成年
+  personProxy.age = 19
+  // 修改年龄值，非整数报错
+  // person.age = "young"
+  console.log(person.age, person, personProxy, personProxy.age);// 打印对象，19和proxy对象，19
+
+  // 3 - 直接支持数组，Proxy 不需要对数组的方法进行重载，省去了众多 hack，减少代码量等于减少了维护成本，而且标准的就是最好的。
+  let arr = [1, 2, 3]
+  let proxy = new Proxy(arr, {
+    get: function (target, key, pre) {
+      console.log("get", key);
+      return Reflect.get(target, key, pre)
+    },
+    set: function (target, key, value, pre) {
+      console.log("set", key, value);
+      return Reflect.set(target, key, value, pre)
+    }
+  })
+  proxy.push(4)
+  // 能够打印出很多内容
+  // get push     (寻找 proxy.push 方法)
+  // get length   (获取当前的 length)
+  // set 3 4      (设置 proxy[3] = 4)
+  // set length 4 (设置 proxy.length = 4)
+
+
+  // 4 -  嵌套支持
+  let obj = {
+    info: {
+      name: 'eason',
+      blogs: ['webpack', 'babel', 'cache']
+    }
+  }
+  let handler = {
+    get(target, key, receiver) {
+      console.log('get', key)
+      // 递归创建并返回
+      if (typeof target[key] === 'object' && target[key] !== null) {
+        return new Proxy(target[key], handler)
+      }
+      return Reflect.get(target, key, receiver)
+    },
+    set(target, key, value, receiver) {
+      console.log('set', key, value)
+      return Reflect.set(target, key, value, receiver)
+    }
+  }
+  let objProxy = new Proxy(obj, handler)
+  // 以下两句都能够进入 set
+  objProxy.info.name = 'Zoe'
+  objProxy.info.blogs.push('proxy')
+
+
+  // 5 - 使用Proxy实现表单校验
+  let student = {
+    name: 'xiaoming',
+    age: 30
+  }
+  let handlerFn = {
+    set(target, key, value, receiver) {
+      if (key === 'name' && typeof value !== 'string') {
+        throw new Error('用户姓名必须是字符串类型')
+      }
+      if (key === 'age' && typeof value !== 'number') {
+        throw new Error('用户年龄必须是数字类型')
+      }
+      return Reflect.set(target, key, value, receiver)
+    }
+  }
+  let boy = new Proxy(student, handlerFn)
+  boy.name = 'xiaohong' // OK
+  boy.age = '18' // 报错  用户年龄必须是数字类型
+</script>
+
+</html>
+<!--
+Proxy：这个词的原意是代理，用在这里表示由它来代理某些操作，可以译为代理器。
+也可以理解成在目标对象之前设置一层拦截，外界对该对象的访问，都必须先通过这层拦截，因此提供了一种机制，可以对外界的访问进行过滤和改写。
+在生活中，代理模式的场景是十分常见的，例如我们现在如果有购买海外产品（给女朋友买一个LV的包包）的需求，更多的是去找代购中介机构，
+而不是直接去国外买。此时，代购起到的作用就是代理的作用。
+
+var proxy = new Proxy(target, handler);
+  target是用Proxy包装的被代理对象（可以是任何类型的对象，包括原生数组，函数，甚至另一个代理）。
+  handler是一个对象，其声明了代理target 的一些操作，其属性是当执行一个操作时定义代理的行为的函数。
+  讲的通俗点，如何让代购帮你买LV的包包呢？
+  首先，你需要告诉代购你看好了哪款包包，这个款式就是Proxy里的第一个参数target。
+  其次就是制定购买策略，例如国外比国内便宜20%，就买2个，便宜40%，就买4个，这个策略就是第二个参数handle。
+1 - get方法是在你得到某对象属性值时预处理的方法，接受两个常用参数
+  target：得到的目标值
+  key：目标的key值，相当于对象的属性
+2 - set方法用来拦截某个属性的赋值操作，可以接受四个参数
+  target:目标值。
+  key：目标的Key值。
+  value：要改变的值。
+  receiver：改变前的原始值。
+3 - 对比：
+  a - 自身支持了数组
+  b - 在数据劫持这个问题上，Proxy 可以被认为是 Object.defineProperty() 的升级版。
+      外界对某个对象的访问，都必须经过这层拦截。因此它是针对 整个对象，而不是 对象的某个属性，所以也就不需要对 keys 进行遍历。
+  
+
+
+
+
+
+ -->
