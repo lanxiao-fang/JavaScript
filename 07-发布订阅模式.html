@@ -1,7 +1,143 @@
 <!--
- * @Description: file content
+ * @Description: 发布订阅模式
  * @Author: xiaofang lan
  * @Date: 2021-07-21 11:49:39
  * @LastEditors: xiaofang lan
- * @LastEditTime: 2021-07-21 11:49:39
+ * @LastEditTime: 2021-07-23 11:08:29
 -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>发布订阅模式</title>
+</head>
+
+<body>
+  <script>
+    /*
+    1、发布订阅模式介绍
+      它定义了一种一对多的关系，可以使得多个观察者对象对一个主题对象进行监听，
+      当这个主题对象发生改变时，依赖的所有对象都会被通知到，所有的观察者都可以街道通知。
+      举个例子：
+        在生活中，我们在使用新闻APP看新闻时，每个人喜欢的类型都不一样，比如我喜欢NBA，
+        但是我不可能一天24小时在不停地刷新，所以我们就会去新闻频道中选择NBA来订阅收藏，
+        当勇士或者湖人有最新的消息时，就会发通知通知我们去观看最新地新闻。
+        分析以上，发现其实APP的NBA专栏就是一个发布者，我们则是订阅者，当有最新的消息，发布者就会发布给我们。
+    2、实际用途：A.在jquery中很多地方都有发布订阅的踪迹，例如事件中on和trigger中封装的方法。
+                B.尤大大的Vue,中子父组件通信使用的emit()和on()方法，使得组件得到解耦，开发更加高效。
+    4、发布订阅模式的缺点：
+        当然一个任何一个东西都是有两面性的，同样发布订阅模式存在以下问题：
+        1、创建订阅者需要消耗一定的时间和内存。
+        2、虽然可以弱化对象之间的联系，如果过度使用的话，反而使代码不好理解及代码不好维护等等。
+     */
+
+    //  3、实现思路
+    // 首先想好谁是发布者（上面的app的NBA新闻专栏）
+    // 然后给发布者添加一个缓存列表，用于存放回调函数来通知订阅者（比如上面的我们收藏了NBA专栏就相当于向发布者注入了通知我们的函数）
+    // 最后就是发布信息，发布者遍历缓存列表，依次去触发订阅者注入的函数
+
+    let NBAcol1 = {} // 定义一个NBA专栏对象，作为发布者
+    NBAcol1.list = [] // 存放订阅者回调函数的缓存列表
+    NBAcol1.on = function (fun) { // 定义on方法，用来给订阅者注入回调函数的，参数就是一个方法
+      this.NBAcol1.list.push(fun) // 将订阅回调函数保存起来。this指向的是调用这个on方法的对象
+    }
+
+    // 发布事件
+    NBAcol1.emit = function () {
+      this.list.forEach(cb => {
+        cb.apply(this, arguments)
+      })
+    }
+
+    // 小明订阅
+    NBAcol1.on = function (team) {
+      console.log("小明订阅的球队是", team);
+    }
+    // 小蓝订阅
+    NBAcol1.on = function (team) {
+      console.log("小蓝订阅的球队是", team);
+    }
+
+    NBAcol1.emit("湖人") // 循环一次，输出2次
+    NBAcol1.emit("勇士") // 循环一次，输出2次
+    /*
+      我订阅的球队是：湖人;
+      我订阅的球队是：湖人;
+      我订阅的球队是：勇士;
+      我订阅的球队是：勇士;
+    */
+
+    /*
+    上面就实现了一个简单的订阅发布模式，不过从打印结果来看，有些尴尬，因为其实，小明只想订阅湖人，
+    小李要订阅勇士。可是专栏都给他们推送了，显然不太合理。
+    之所以出现这种情况是因为在执行on方法的时候将订阅函数列表中的函数依次都执行了。
+    所以我们要对代码进行改造，我们可以先增加一个key，使订阅者只订阅自己感兴趣的消息。
+    */
+    let NBAcol = {};//自定义一个NBA专栏对象
+    NBAcol.list = {};// 这里放一个列表用来缓存订阅者的回调函数
+    NBAcol.on = function (key, fun) {
+      // 如果还没有订阅过此类消息，给该类消息创建一个缓存列表
+      if (!this.list[key]) {
+        this.list[key] = [];
+      }
+      this.list[key].push(fun); //把fn先存到列表中
+    };
+    //发布事件
+    NBAcol.emit = function () {
+      let key = Array.prototype.shift.call(arguments);// 取出消息类型名称
+      let funs = this.list[key];//匹配对应的回调函数的结合
+      if (!funs || funs.length === 0) {//如果没有订阅过消息，则return;
+        return;
+      };
+      funs.forEach(fun => {
+        fun.apply(this, arguments);
+      });// 当发布的时候再把列表里存的函数依次执行
+    };
+    //小明的订阅NBA专栏
+    NBAcol.on('xiaomin', function (team) {
+      console.log("我订阅的球队是：" + team)
+    })
+    //小李的订阅NBA专栏
+    NBAcol.on('xiaoli', function (team) {
+      console.log("我订阅的球队是：" + team)
+    })
+    NBAcol.emit('xiaomin', '湖人');
+    NBAcol.emit('xiaoli', '勇士');
+    /*
+      我订阅的球队是：湖人;
+      我订阅的球队是：勇士;
+    */
+
+    // 取消订阅
+    NBAcol.remove = function (key, fun) {
+      // 这回我们加入了取消订阅的方法
+      let funs = this.list[key];
+      // 如果缓存列表中没有函数，返回false
+      if (!funs) return false;
+      // 如果没有传对应函数的话
+      // 就会将key值对应缓存列表中的函数都清空掉
+      if (!fun) {
+        funs && (funs.length = 0);
+      } else {
+        // 遍历缓存列表，看看传入的fun与哪个函数相同
+        // 如果相同就直接从缓存列表中删掉即可
+        funs.forEach((cb, i) => {
+          if (cb === fun) {
+            funs.splice(i, 1);
+          }
+        });
+      }
+    }
+
+    // 取消dog方法的订阅
+    NBAcol.remove('xiaoli', function (team) {
+      console.log("我订阅的球队是：" + team)
+    });
+
+  </script>
+</body>
+
+</html>
