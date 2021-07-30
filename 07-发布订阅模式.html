@@ -3,7 +3,7 @@
  * @Author: xiaofang lan
  * @Date: 2021-07-21 11:49:39
  * @LastEditors: xiaofang lan
- * @LastEditTime: 2021-07-23 11:08:29
+ * @LastEditTime: 2021-07-23 14:14:43
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -125,7 +125,7 @@
         // 遍历缓存列表，看看传入的fun与哪个函数相同
         // 如果相同就直接从缓存列表中删掉即可
         funs.forEach((cb, i) => {
-          if (cb === fun) {
+          if (cb === fun) { // cb === fun 这个判断是不对的，除非两个引用相同的方法
             funs.splice(i, 1);
           }
         });
@@ -136,6 +136,7 @@
     NBAcol.remove('xiaoli', function (team) {
       console.log("我订阅的球队是：" + team)
     });
+    NBAcol.emit("xiaoli", "123")
 
   </script>
 </body>
