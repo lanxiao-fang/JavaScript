@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        const formatNum = (num, n = 1) => {
+            var f = parseFloat(num);
+            if (isNaN(f)) {
+                return false;
+            }
+            f = Math.round(num * Math.pow(10, n)) / Math.pow(10, n); // n 幂
+            var s = f.toString();
+            var rs = s.indexOf('.');
+            //判定如果是整数，增加小数点再补0
+            if (rs < 0) {
+                rs = s.length;
+                s += '.';
+            }
+            while (s.length <= rs + n) {
+                s += '0';
+            }
+            const regex = new RegExp(`(?!^)(?=(\\d{3})+${s.includes('.') ? '\\.' : '$'})`, 'g')
+            return s.replace(regex, ',')
+        }
+        console.log(formatNum(1314520.678));
+    </script>
+</head>
+
+<body>
+
+</body>
+
+</html>
