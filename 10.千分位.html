@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <script>
+        // 千分位
         const formatNum = (num, n = 1) => {
             var f = parseFloat(num);
             if (isNaN(f)) {
@@ -27,6 +28,12 @@
             return s.replace(regex, ',')
         }
         console.log(formatNum(1314520.678));
+
+
+        // 创建临时id
+        const randomString = () => Math.random().toString(36).slice(2);
+
+        console.log(randomString());
     </script>
 </head>
 
