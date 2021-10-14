@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        // Array.from(arrayLike[, mapFn[, thisArg]]) 方法从一个类似数组或可迭代对象创建一个新的，浅拷贝的数组实例。
+        // arrayLike —— 想要转换成数组的伪数组对象或可迭代对象。
+        // mapFn —— 可选，如果指定了该参数，新数组中的每个元素会执行该回调函数。
+        // thisArg —— 可选参数，执行回调函数 mapFn 时 this 对象。
+
+        // 1-从string生成数组
+        console.log(Array.from('test'));
+
+        // 2-接受第二个参数，回调函数
+        const cities = [{
+                name: 'Milan',
+                visited: 'no'
+            },
+            {
+                name: 'Palermo',
+                visited: 'yes'
+            },
+            {
+                name: 'Genoa',
+                visited: 'yes'
+            },
+            {
+                name: 'Berlin',
+                visited: 'no'
+            },
+            {
+                name: 'Hamburg',
+                visited: 'yes'
+            },
+            {
+                name: 'New York',
+                visited: 'yes'
+            }
+        ];
+        // 拷贝数组生成新数组，返回新数组中name属性组成的数组
+        const cityNames = Array.from(cities, ({
+            name
+        }) => name);
+        console.log('城市名称', cityNames);
+        // 等同于这个，但是数组拷贝，断了连接
+        console.log(cities.map(({
+            name
+        }) => name));
+
+        // ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+
+        //3-给数组分组
+        const chunk = (arr, size) => {
+            // 1、根据数组长度和分割大小， 生成一个对应长的值全部为undefined的新数组
+            const list = Array.from({
+                length: Math.ceil(arr.length / size)
+            })
+
+            //2、 遍历新数组
+            const newList = list.map((v, i) => {
+                console.log(v, i);
+                // .slice(开始位置，结束位置)
+                return arr.slice(i * size, size * (i + 1))
+            })
+            console.log('分组后', newList);
+
+            // 总：
+            return Array.from({
+                length: Math.ceil(arr.length / size)
+            }, (v, i) => {
+                // v是新数组里的每一项，i为index索引
+                console.log('000', i);
+                return arr.slice(i * size, size * (i + 1))
+            })
+        };
+
+        console.log(chunk([1, 2, 3, 4, 45], 2))
+
+        // ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+
+        // reduce(total,currentValue, index,arr)方法接受一个回调函数，回调函数接受3个参数
+        // total： 初始值，或者计算结束后的返回值，必需
+        // currentValue：当前元素，必需
+        // index： 当前索引，可选
+        // arr：当前元素所属的数组对象，可选
+        // 去重并按照数字排序
+        let tempList = [12, 3, 43, 5, 56, 34, 2, 1, 3, 4, 5, 1, 1, 1];
+        // const filterTemplist = Object.keys(tempList.reduce((acc, val) => (acc[val] = 0, acc), {})).map(Number);
+        // console.log('去重', filterTemplist);
+
+        // acc即total，val即currentValue
+        const arr = tempList.reduce((acc, val) => {
+            // console.log(acc, val);
+            return (acc[val] = 0, acc)
+        }, {})
+        console.log('arr', arr);
+        const arr2 = Object.keys(arr).map(Number)
+        console.log('arr2', arr2);
+
+        // ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+        // 1、返回想要的对象
+        const noPassword = ({
+            password,
+            ...rest
+        }) => rest;
+        const user1 = {
+            id: 100,
+            name: 'Howard Moon',
+            password: 'password'
+        };
+        console.log('不返回密码', noPassword(user1)); //{ id: 100, name: 'Howard Moon' }
+        // 2、动态删除某个属性
+        const user2 = {
+            id: 100,
+            name: 'Howard Moon',
+            password: 'password'
+        };
+        // 返回的是一个方法
+        const removeProperty = prop => ({
+            [prop]: _,
+            ...rest
+        }) => rest;
+        //输入第二个参数的某个属性去掉
+        const removePassword = removeProperty('password');
+        console.log('123', removePassword);
+        //第二个参数是一个对象
+        console.log('456', removePassword(user2));
+        //{ id: 100, name: 'Howard Moon' }
+
+
+        // ————————————————————————————————————————————————————————————————————————————
+        // 将数组中的 VIP 用户余额加 10(就是增加一个对象替换原来的)
+        const users3 = [{
+                username: "Kelly",
+                isVIP: true,
+                balance: 20
+            },
+            {
+                username: "Tom",
+                isVIP: false,
+                balance: 19
+            },
+            {
+                username: "Stephanie",
+                isVIP: true,
+                balance: 30
+            }
+        ];
+        // 生成新数组，不影响旧数组
+        const users4 = users3.map(v => (
+            v.isVIP ? {
+                ...v,
+                balance: v.balance + 10
+            } : v
+        ));
+        console.log('user3', users4);
+
+
+        // ————————————————————————————————————————————————————————————————————————————————————
+        // 判断一串字符是否含有["a", "e", "o", "i", "u"]
+        const randomStr = "hdjrwqpi";
+        const testArr = ["a", "e", "o", "i", "u"];
+        // ...扩展运算符
+        [...randomStr].some(v => testArr.includes(v));
+
+
+        // ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+        // 判断数组所有对象，如果对象所有属性或者排除某个属性外，全为空的话，则从数组里删除
+        const table = [{
+            name: 'jack1',
+            age: 18
+        }, {
+            name: '',
+            age: null
+        }, {
+            name: 'jack2',
+            age: 28
+        }, {
+            name: 'jack',
+            age: 49
+        }, {
+            name: '',
+            age: 18
+        }]
+        const filterTable = table.filter(({
+            // 结构， rest要判断的所有属性
+            key,
+            ...rest
+            // some，只要有一个属性有值，为true直接返回，性能比every要好
+        }) => Object.values(rest).some(i => i))
+
+
+        // ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+        // Object.assign() 方法用于将所有可枚举属性的值从一个或多个源对象分配到目标对象。它将返回目标对象。
+        const target = {
+            a: 1,
+            b: 2
+        };
+        const source = {
+            b: 4,
+            c: 5
+        };
+        // 1-target为目标对象，source为源对象，将源对象的属性分配给目标对象，目标对象就会有两者的属性，并且目标对象的相同属性会被源对象覆盖掉
+        // 合并对象，目标对象自身也会改变
+        const returnedTarget = Object.assign(target, source);
+
+        console.log(target);
+        // expected output: Object { a: 1, b: 4, c: 5 }
+
+        console.log(returnedTarget);
+        // expected output: Object { a: 1, b: 4, c: 5 }
+
+        // 2-拷贝数组并指定更改哪个位置的数据，将数组索引为2的值修改为15
+        const original = [1, 2, 3, 4];
+        const copy = Object.assign([], original, {
+            2: 15
+        });
+        console.log('copy', copy); // [1, 2, 15, 4]
+
+        // 3-合并2个数组，索引对应的值会被覆盖。下面代码中，assign把数组视为属性名为 0、1、2 的对象，因此源数组的 0 号属性4覆盖了目标数组的 0 号属性1
+        const arrCopy = Object.assign([1, 2, 3], [4, 5])
+        console.log('合并2个数组', arrCopy); // [4,5，3]
+
+
+
+        // 4-复制对象，切断连接
+        const obj = {
+            name: 'jack',
+            fenshu: {
+                yuwen: 90,
+                math: 80,
+                yingyu: 88,
+                like: {
+                    wuli: 90,
+                    shengwu: 67
+                }
+            }
+        }
+        const copyObj = Object.assign({}, obj)
+        // 这时改变原数据obj一级属性，不会影响拷贝后的对象
+        obj.name = 'jack111111'
+        // 改变二级属性时会发现，二级属性改了，仍然会影响到拷贝后的数据，说明多级属性时，Object.assign只能做到浅拷贝，想要深拷贝得用其他的办法
+        obj.fenshu.like.wuli = 99999
+        console.log('拷贝对象', copyObj, obj);
+
+
+        // ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+    </script>
+</head>
+
+<body>
+
+</body>
+
+</html>
