@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        Function.prototype.myApply = function (obj) {
+            console.log('obj', obj, arguments);
+            let _this = obj || window
+            _this.temp = this // logName.myCall, 则这里的this就是logName函数
+            if (arguments[1]) {
+                // 存在入参
+                let args = Array.from(arguments[1])
+                _this.temp(...args) // 此时等于obj调用logName函数，函数内的this指向则是obj
+            } else {
+                _this.temp()
+            }
+            delete _this.temp
+        }
+
+
+        var person = {
+            name: 'lxf'
+        }
+
+        function logName() {
+            console.log(this.name);
+        }
+
+        logName.myApply(person, ['jack', 'mark'])
+    </script>
+</head>
+
+<body>
+
+</body>
+
+</html>

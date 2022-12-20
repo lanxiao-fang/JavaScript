@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        let arr = [1, 2, 3, 3, 1, ]
+
+        // 第一种方法
+        function removeRepeat(arr) {
+            let newArr = []
+            for (let index = 0; index < arr.length; index++) {
+                const element = arr[index];
+                if (!newArr.includes(element)) {
+                    newArr.push(element)
+                }
+            }
+            console.log('newArr', newArr);
+            return newArr
+
+        }
+
+        removeRepeat(arr)
+
+        // 第二种
+        function removeRepeat2(arr) {
+            let newArr = new Set(arr)
+            return Array.from(newArr)
+        }
+        console.log(removeRepeat2(arr));
+
+        // 第三种，双层循环对比
+        function removeRepeat3(arr) {
+
+
+            
+        }
+    </script>
+</head>
+
+<body>
+
+</body>
+
+</html>

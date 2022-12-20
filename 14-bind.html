@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实现bind</title>
+    <script>
+        Function.prototype.myBind = function (obj) {
+            // console.log('obj', obj, arguments, '######', this); // logName去调用的myBind， this指向logName
+            var _this = this
+            var args_all = []
+            // 第一个括号传进来的入参， 'jack', 'mark'
+            var args_1 = Array.from(arguments).slice(1, arguments.length)
+            return function F() {
+                // console.log('正式执行时传进来的第二次入参', arguments);
+                var args_2 = Array.from(arguments)
+                args_all = args_1.concat(args_2)
+                // console.log('总参数', args_all);
+                console.log(this instanceof F, this, F);
+                if (this instanceof F) {
+                    _this.apply(this, args_all) // 相当于logName.apply(obj, args_all)
+                } else {
+                    _this.apply(obj, args_all) // 相当于logName.apply(obj, args_all)
+                }
+
+            }
+        }
+
+        var person = {
+            name: 'lxf'
+        }
+
+        function logName() {
+            console.log(this.name);
+        }
+        var fn = logName.myBind(person, 'jack', 'mark') // bind执行时会先返回一个函数，并不会立即执行方法
+        fn('rose', 'hhhh')
+
+        // ---------------------------------------------------------------------------------------------------
+
+        // Person构造函数
+        function Person(name, age, job) {
+            console.log('---------', this);
+            this.name = name;
+            this.age = age;
+            this.job = job;
+            this.sayName = function () {
+                return this.name;
+            }
+        }
+        // new出来的对象
+        // var person2 = new Person("tom", 21, "WEB");
+        // var fn2 = logName.myBind(person2, 'jack', 'mark') // bind执行时会先返回一个函数，并不会立即执行方法
+        // fn2('rose', 'hhhh')
+        // console.log('person2.name', person2.name);
+        // 打印tom
+
+        // ---------------------------------------------------------------------------------------------------
+        // 加上 this instanceof F  判断
+        var Person_1 = Person.myBind(person, 'jack-11111111111', 'mark') // 将this绑定给person
+        var person3 = new Person_1('rose', 'fffff')
+        console.log('person3.name', person3.name)
+    </script>
+</head>
+
+<body>
+
+</body>
+
+</html>

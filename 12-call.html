@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        Function.prototype.myCall = function (obj) {
+            let _this = obj || window
+            // arguments是类数组
+            var args = Array.from(arguments).slice(1, arguments.length) // 先转化为数组 之后 从第二个元素（下标为0）开始拷贝剩余的作为参数
+            console.log('3', obj, arguments, args);
+            _this.temp = this // logName.myCall, 则这里的this就是logName函数
+            _this.temp(...args) // 执行logName函数 此时这个函数的调用者 _this 即 传入的 obj 达到改变this指向的效果
+            delete _this.temp //  删除刚才添加的属性
+
+        }
+        var person = {
+            name: 'lxf'
+        }
+
+
+        function logName() {
+            console.log(this.name);
+        }
+
+        logName.myCall(person, 'jack', 'mark')
+    </script>
+</head>
+
+<body>
+
+</body>
+
+</html>
