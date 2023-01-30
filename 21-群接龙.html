@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>群接龙</title>
+    <script>
+        // 第一题
+        class People {
+            constructor(name) {
+                this.name = name
+                this.eventsObj = {}
+            }
+
+            on(eventName, callback) {
+                if (!this.eventsObj[eventName]) {
+                    this.eventsObj[eventName] = []
+                }
+                this.eventsObj[eventName].push(callback)
+            }
+
+            off(eventName, callback) {
+                if (!this.eventsObj[eventName]) return
+                this.eventsObj[eventName] = this.eventsObj[eventName].filter(
+                    (cb) => cb !== callback
+                )
+            }
+
+            emit(eventName, ...args) {
+                if (!this.eventsObj[eventName]) return
+                this.eventsObj[eventName].forEach((callback) => callback(...args))
+            }
+
+            sayHi() {
+                console.log(`Hi, I am ${this.name}`)
+            }
+        }
+
+
+
+        /* 以下为测试代码 */
+        const say1 = (greeting) => {
+            console.log(`${greeting}, nice meeting you.`)
+        }
+
+        const say2 = (greeting) => {
+            console.log(`${greeting}, nice meeting you, too.`)
+        }
+
+        const jerry = new People('Jerry')
+        jerry.sayHi()
+        // => 输出：'Hi, I am Jerry'
+
+        jerry.on('greeting', say1)
+        jerry.on('greeting', say2)
+
+        jerry.emit('greeting', 'Hi')
+        // => 输出：'Hi, nice meeting you.' 和 'Hi, nice meeting you, too'
+
+        jerry.off('greeting', say1)
+        jerry.emit('greeting', 'Hi')
+        // => 只输出：'Hi, nice meeting you, too'
+
+
+
+        // 第二题
+        const sleep = (delay) => {
+            return new Promise(resolve => setTimeout(resolve, delay))
+        }
+
+        const anyFunc = async () => {
+            console.log("123") // 输出 123
+            await sleep(300) // 暂停 300 毫秒
+            console.log("456") // 输出 456，但是距离上面输出的 123 时间上相隔了 300 毫秒
+        }
+        // anyFunc() // 执行
+
+
+        // 第三题
+        // 思路
+        // 对于属性路径字符串的拆分，通过 split 函数，以 "." 为分隔符，将其拆分为数组。
+        // 遍历时，对于数组元素中以 "[]" 结尾的情况，说明该属性是数组，需要特殊处理。通过正则表达式，将 "[]" 前的数字提取出来，作为数组的索引。
+        // 如果该属性不存在，则直接返回 undefined，结束遍历。
+        const deepGet = (obj, prop) => {
+            if (!obj) return undefined;
+            const path = prop.split(".");
+            let result = obj;
+            for (const p of path) {
+                const match = p.match(/^(.+)\[(\d+)\]$/);
+                if (match) {
+                    if (!Array.isArray(result[match[1]])) return undefined;
+                    result = result[match[1]][parseInt(match[2])];
+                } else {
+                    result = result[p];
+                }
+                if (!result) return undefined;
+            }
+            return result;
+        };
+
+        /** 以下为测试代码 */
+        console.log(deepGet({
+            school: {
+                student: {
+                    name: 'Tomy'
+                },
+            },
+        }, 'school.student.name')); // => 'Tomy'
+
+        console.log(deepGet({
+            school: {
+                students: [{
+                        name: 'Tomy'
+                    },
+                    {
+                        name: 'Lucy'
+                    },
+                ],
+            }
+        }, 'school.students[1].name')); // => 'Lucy'
+
+        // 对于不存在的属性，返回 undefined
+        console.log(deepGet({
+            user: {
+                name: 'Tomy'
+            }
+        }, 'user.age')); // => undefined
+        console.log(deepGet({
+            user: {
+                name: 'Tomy'
+            }
+        }, 'school.user.age')); // => undefined
+
+
+        // 第四题
+        const combo = (...funcs) => (arg) =>
+            funcs.reduceRight((acc, func) => func(acc), arg);
+
+        /* 以下为测试代码 */
+        const addOne = (a) => a + 1;
+        const multiTwo = (a) => a * 2;
+        const divThree = (a) => a / 3;
+        const toString = (a) => a + "";
+        const split = (a) => a.split("");
+
+        split(toString(addOne(multiTwo(divThree(666)))))
+        // => ["4", "4", "5"]
+
+        const testForCombo = combo(split, toString, addOne, multiTwo, divThree);
+        testForCombo(666)
+        // => ["4", "4", "5"]
+
+
+        // 第五题
+    </script>
+</head>
+
+<body>
+
+</body>
+
+</html>

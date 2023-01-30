@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        // 数组解构写法,解构不成功的值就等于undefined
+        // var a = 1
+        // var b = 2
+        // var c = 3
+
+        var [a, b, c, d] = [1, 2, 3]
+        console.log(a, b, c, d);
+
+        // 默认值
+        var [e = 99, f = 101] = [100]
+        console.log(e, f);
+
+        function fn() {
+            return 123
+        }
+
+        var [g = fn(), h = 1] = [56, 57]
+        console.log(g, h); // 56,57
+        var [i = fn(), j = 1] = [undefined, null]
+        console.log(i, j); // 123, null
+
+
+        // 对接解构，按照键值对匹配
+        let obj = {
+            name: 'jack',
+            age: 18,
+            father: undefined
+        }
+        let {
+            name: _name, // 别名
+            age,
+            score: _score = 88, // 别名+ 默认值
+            father = 'mark' // 不存在，使用了默认值
+        } = obj
+        console.log(_name, age, _score, father); // jack 18 88 mark
+
+
+
+        let s = new Set()
+        s.add(1).add(2).add(1) // 去重，第二个1不会加进去
+        console.log(s); // {1,2}
+        let s2 = new Set([1, 2, 3, 1, 2]) // 去重
+        console.log(s2); // {1,2,3}
+        console.log(Array.from(s2)); // [1, 2, 3]
+
+        // 求出大于10的数据并且去重
+        const arr = [1, 23, 54, 1, 23, 18, 19, 54, 2, 3]
+        let filterNum = arr.filter(item => item > 10)
+        let newFilterNum = Array.from(new Set(filterNum))
+        console.log('最终数据', newFilterNum);
+    </script>
+</head>
+
+<body>
+
+</body>
+
+</html>
