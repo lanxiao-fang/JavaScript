@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        function debounce(fn, delay) {
+            let timer = null
+            return function () {
+                let _this = this // 为了确保上下文的this
+                let args = [...arguments]
+                if (timer) {
+                    clearTimeout(timer)
+                    timer = null
+                }
+                timer = setTimeout(() => {
+                    fn.apply(_this, args)
+                }, delay)
+            }
+        }
+
+
+        function throttle(fn, delay) {
+            let preTime = Date.now()
+            return function () {
+                let _this = this
+                let args = [...arguments]
+                let nowTime = Date.now()
+                if (nowTime - preTime > delay) {
+                    preTime = Date.now()
+                    return fn.apply(_this, args)
+                }
+            }
+        }
+    </script>
+</head>
+
+<body>
+
+</body>
+
+</html>
